@@ -1,12 +1,10 @@
 import glfw
 from OpenGL import GL
-from glEngine.EMesh import EMesh
-from glEngine.EShader import EShader
-from glEngine.ECamera import ECamera
-from glEngine.ELoader import ELoader
-
-import numpy as np
-
+from meshDigitalTwin.glEngine.EMesh   import EMesh
+from meshDigitalTwin.glEngine.EModel  import EModel
+from meshDigitalTwin.glEngine.EShader import EShader
+from meshDigitalTwin.glEngine.ECamera import ECamera
+from meshDigitalTwin.glEngine.ELoader import ELoader
 
 #nodes = [
 #     0.5,  0.5,  0.5,
@@ -40,6 +38,8 @@ loader = ELoader( "Elements.txt", "Nodes.txt" )
 nodes = loader.nodes
 elements = loader.elements
 
+model = EModel( "model", nodes )
+
 def glInit( window ):
     # Compile The Program and shaders
     GL.glEnable( GL.GL_DEPTH_TEST )
@@ -61,19 +61,24 @@ def main():
 
     [mesh, shader, camera] = glInit( window )
     print( "Entering polling loop" )
-    GL.glPolygonMode( GL.GL_FRONT_AND_BACK, GL.GL_LINE )
+    #GL.glPolygonMode( GL.GL_FRONT_AND_BACK, GL.GL_LINE )
 
     t0 = glfw.get_time()
+    d = 0.0
     while not glfw.window_should_close(window):
         t1 = glfw.get_time()
         if t1 - t0 > dfps:
             t0 = t1
-            GL.glClearColor(0.0, 1.0, 0.0, 1.0)
+            GL.glClearColor(0.5, 0.5, 0.5, 1.0)
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT )
 
             
             camera.updateView()
             mesh.draw()
+            
+            d = ( d + 0.01 ) % 10
+            array = model.eval( d - 5 )
+            mesh.updateData( array )
 
             glfw.swap_buffers(window)
             glfw.poll_events()
